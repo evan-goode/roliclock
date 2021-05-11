@@ -3,6 +3,9 @@
 #include <string>
 #include <ctime>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <BlocksHeader.h>
 
 #include "font.h"
@@ -10,6 +13,7 @@
 #define FPS 25
 #define DISPLAY_SIZE 15
 #define DISPLAY_ROTATE 2
+#define LIGHTSD_PIPE_PATH "/run/lightsd/pipe"
 
 // Monitors a PhysicalTopologySource for changes to the connected BLOCKS and
 // prints some information about the BLOCKS that are available.
@@ -23,6 +27,7 @@ public:
 
 private:
     juce::Block::Ptr activeBlock;
+    std::vector<std::vector<juce::LEDColour>> fb;
 
     // Called by the PhysicalTopologySource when the BLOCKS topology changes.
     void topologyChanged() override;
@@ -35,7 +40,9 @@ private:
 
     void redraw();
 
-    void setLED(int x, int y, juce::LEDColour color);
+    void sendFb();
+
+    void drawPixel(int x, int y, juce::LEDColour color);
 
     void drawRect(int posX, int posY, int width, int height, juce::LEDColour color);
 
@@ -43,6 +50,7 @@ private:
 
     void drawTime();
 
+    juce::NamedPipe *lightsdPipe;
 
     // The PhysicalTopologySource member variable which reports BLOCKS changes.
     juce::PhysicalTopologySource pts;
